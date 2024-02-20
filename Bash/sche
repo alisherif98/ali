@@ -1,0 +1,36 @@
+#!/bin/bash
+
+# File to store the previous memory usage value
+PREV_USAGE_FILE="/tmp/prev_mem_usage"
+
+# Threshold for what constitutes a "sudden increase" (in percentage)
+THRESHOLD=10
+
+# Function to get current memory usage percentage
+getCurrentMemUsage() {
+  free | grep Mem | awk '{print $3/$2 * 100.0}'
+}
+
+# Read the previous memory usage value if the file exists
+if [[ -f "$PREV_USAGE_FILE" ]]; then
+  read -r prev_usage < "$PREV_USAGE_FILE"
+else
+  prev_usage=0
+fi
+
+# Get current memory usage
+current_usage=$(getCurrentMemUsage)
+
+# Calculate the difference
+diff_usage=$(echo "$current_usage - $prev_usage" | bc)
+
+# Check if the difference exceeds the threshold
+if (( $(echo "$diff_usage > $THRESHOLD" | bc -l) )); then
+  echo "Sudden increase in memory consumption detected: $diff_usage%" > ~/Desktop/sudden
+else
+  echo "No sudden increase in memory consumption." > ~/Desktop/sudden
+fi
+
+# Save the current memory usage for the next run
+echo "$current_usage" > "$PREV_USAGE_FILE"
+

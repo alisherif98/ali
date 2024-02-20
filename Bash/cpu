@@ -1,0 +1,21 @@
+#!/bin/bash
+
+# Define the maximum memory usage threshold as a percentage (e.g., 90%)
+THRESHOLD_PERCENTAGE=90
+
+# Get total memory and used memory in MB
+TOTAL_MEM=$(free -m | grep -i mem | awk '{print $2}')
+USED_MEM=$(free -m | grep -i mem | awk '{print $3}')
+
+# Calculate the percentage of memory used
+MEMORY_USAGE_PERCENTAGE=$(awk "BEGIN {printf \"%.2f\", ($USED_MEM/$TOTAL_MEM)*100}")
+
+# Compare current memory usage with the threshold
+if (( $(echo "$MEMORY_USAGE_PERCENTAGE >= $THRESHOLD_PERCENTAGE" | bc -l) )); then
+  # Memory usage is at or above the threshold
+  echo "Memory usage warning: ${MEMORY_USAGE_PERCENTAGE}% used of ${TOTAL_MEM}MB total." > ~/Desktop/cpuout
+
+else
+  echo "Current memory usage is ${MEMORY_USAGE_PERCENTAGE}% of ${TOTAL_MEM}MB total." > ~/Desktop/cpuout
+fi
+
